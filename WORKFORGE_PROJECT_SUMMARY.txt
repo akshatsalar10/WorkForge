@@ -1,0 +1,149 @@
+================================================================================
+ WORKFORGE — PRODUCTION-GRADE MULTI-TENANT MERN SAAS PLATFORM
+ Project Summary, Architecture, Feature Guide, Demo Accounts & Quick Start
+================================================================================
+
+1. PRODUCT OVERVIEW & VISION
+--------------------------------------------------------------------------------
+WorkForge is a multi-tenant team project and operations management platform designed for organizations, project managers, and engineering teams.
+
+Organizations can create dedicated workspaces, invite members with Role-Based Access Controls (RBAC), create projects, assign sequential auto-incrementing tasks (e.g., WEB-1, API-104), collaborate via comments, attach files up to 10MB, track activity streams, receive real-time Socket.IO notifications, view productivity analytics, and search globally using Command Palette keyboard shortcuts (Cmd/Ctrl + K).
+
+
+2. PRE-SEEDED DEMO ACCOUNTS & LOGIN CREDENTIALS
+--------------------------------------------------------------------------------
+The database has been seeded with realistic live project data (Organizations, Projects, Teams, Tasks across all 4 Kanban statuses, Subtasks, Comments, Activity Logs, and Notifications).
+
+All demo accounts use the default password: Password123
+
+  [Role]               [Email]                   [Password]       [Permissions]
+  --------------------------------------------------------------------------------
+  Organization Owner   alex@workforge.com        Password123      Full Owner Access, Org Deletion, Data Export JSON
+  Organization Admin   sarah@workforge.com       Password123      Admin Access, Member Invites, Audit Logs
+  Project Manager      david@workforge.com       Password123      Project Management, Task Assignment
+  Software Engineer    emily@workforge.com       Password123      Task Execution, Drag & Drop Board, Subtasks
+
+
+3. COMPLETE FEATURE SPECIFICATION (ALL 14 MODULES)
+--------------------------------------------------------------------------------
+Module 1: Monorepo Foundation & Tech Stack
+  - Server: Node.js, Express, TypeScript, Mongoose, Socket.IO, Winston, Zod validation.
+  - Client: React, Vite, TypeScript, Redux Toolkit Query (RTK Query), Tailwind CSS, Lucide icons, Recharts.
+  - Design Aesthetics: Sleek dark mode palette, glassmorphism card containers, responsive layouts.
+
+Module 2: Authentication & Identity Management
+  - JWT access tokens (15m expiry) and HTTP-only refresh tokens (7d rotation).
+  - Bcrypt password hashing (10 salt rounds).
+  - Registration, login, password reset, email verification, and profile management.
+
+Module 3: Multi-Tenant Organizations & Workspaces
+  - Isolated tenant workspaces identified by unique slug URLs (e.g. acme-corp, stark-tech).
+  - Organization Member roles: OWNER, ADMIN, MEMBER.
+  - Secure tenant guard middleware enforcing strict data boundary isolation.
+
+Module 4: Team Management & Member Assignments
+  - Team creation, member assignments, and team lead designations.
+  - Interactive Teams page and Team Details roster view.
+
+Module 5: Projects & Access Controls
+  - Project key generation (e.g. WEB, API, DES).
+  - Project member roles: MANAGER, MEMBER, VIEWER.
+  - Project archiving, status filters, and priority tags (LOW, MEDIUM, HIGH, URGENT).
+
+Module 6: Task Management & Auto-Increment Key Generator
+  - Human-readable sequential task keys per project (WEB-1, WEB-2, API-1).
+  - Subtask checklist with progress percentages.
+  - Task priority, assignee allocation, due date tracking, and Label badges.
+
+Module 7: Interactive Drag-and-Drop Kanban Board
+  - Interactive @dnd-kit Kanban board with 4 columns: To Do, In Progress, In Review, Done.
+  - Optimistic UI updates with automatic server rollback on network errors.
+
+Module 8: Comments & Activity Stream
+  - Task discussion thread with Markdown support and relative timestamp formatting.
+  - Automated activity stream logs for task creation, status moves, and comment additions.
+
+Module 9: Real-Time Notifications Engine
+  - Socket.IO server initialization with authenticated socket handshake.
+  - Instant room broadcasts on task assignment, comment additions, and role changes.
+  - Animated pulse notification badge and popover dropdown.
+
+Module 10: File Attachments & Asset Storage Provider
+  - Multer multipart form upload engine with 10MB size limits and MIME filters.
+  - Static asset serving under /uploads with local disk unlinking on file deletion.
+  - AttachmentList UI component supporting file previews and direct downloads.
+
+Module 11: Productivity & Team Analytics Dashboard
+  - MongoDB Aggregation Engine ($match, $group, $lookup) for velocity throughput.
+  - Recharts dashboard rendering Task Status Bar Charts, Priority Breakdown Pie Charts, and Team Workload Capacity tables.
+
+Module 12: Global Search & Command Palette
+  - Multi-collection parallel regex search across tasks, projects, teams, and members.
+  - Keyboard shortcut Cmd/Ctrl + K launching interactive command palette modal.
+
+Module 13: System Settings & Security Audit Log
+  - Data Export JSON engine generating full downloadable workspace backups.
+  - Security audit log event timeline for workspace auditing.
+  - Danger Zone organization purging requiring exact slug text verification.
+
+Module 14: System Hardening & Documentation
+  - Rate limiting middleware (apiRateLimiter, authRateLimiter).
+  - Interactive OpenAPI 3.0.3 specification JSON endpoint under /api-docs.
+  - System status monitoring page under /health with database latency pings.
+
+
+4. HOW TO RUN THE PROJECT LOCALLY
+--------------------------------------------------------------------------------
+Prerequisites:
+  - Node.js (v18 or higher)
+  - MongoDB (running locally at mongodb://localhost:27017/workforge)
+
+Step 1: Install Monorepo Dependencies
+  $ npm run install:all
+
+Step 2: Seed MongoDB Database with Demo Data
+  $ cd server && npm run seed
+
+Step 3: Start Server & Client Dev Servers
+  - Terminal 1 (Backend Server on http://localhost:5000):
+    $ cd server && npm run dev
+
+  - Terminal 2 (Frontend App on http://localhost:5173):
+    $ cd client && npm run dev
+
+Step 4: Open Browser
+  Navigate to http://localhost:5173 and log in with any demo account (e.g., alex@workforge.com / Password123).
+
+
+5. API ENDPOINT QUICK REFERENCE
+--------------------------------------------------------------------------------
+  Authentication:
+    POST   /api/v1/auth/register
+    POST   /api/v1/auth/login
+    POST   /api/v1/auth/refresh-token
+    GET    /api/v1/auth/me
+
+  Organizations & Members:
+    GET    /api/v1/organizations
+    POST   /api/v1/organizations
+    GET    /api/v1/organizations/:orgId/members
+    GET    /api/v1/organizations/:orgId/export
+    GET    /api/v1/organizations/:orgId/audit-logs
+    DELETE /api/v1/organizations/:orgId
+
+  Projects & Tasks:
+    GET    /api/v1/organizations/:orgId/projects
+    POST   /api/v1/organizations/:orgId/projects
+    GET    /api/v1/organizations/:orgId/projects/:projectId/tasks
+    POST   /api/v1/organizations/:orgId/projects/:projectId/tasks
+    PATCH  /api/v1/organizations/:orgId/tasks/:taskId/status
+
+  Analytics, Search & System:
+    GET    /api/v1/organizations/:orgId/analytics/summary
+    GET    /api/v1/organizations/:orgId/search?q=query
+    GET    /api/v1/health
+    GET    /api-docs
+
+================================================================================
+ WorkForge SaaS Application — Ready for Production Deployment
+================================================================================

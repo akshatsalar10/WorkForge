@@ -1,0 +1,118 @@
+import nodemailer from 'nodemailer';
+import { env } from '../config/env';
+
+export class EmailService {
+  private static getTransporter() {
+    if (!env.SMTP_USER || !env.SMTP_PASS) {
+      return null;
+    }
+
+    return nodemailer.createTransport({
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      secure: env.SMTP_SECURE,
+      auth: {
+        user: env.SMTP_USER,
+        pass: env.SMTP_PASS
+      }
+    });
+  }
+
+  private static async sendMail(options: { to: string; subject: string; html: string }) {
+    const transporter = this.getTransporter();
+
+    if (!transporter) {
+      console.log(`[EMAIL LOG - NO SMTP CREDS] To: ${options.to} | Subject: ${options.subject}`);
+      return;
+    }
+
+    try {
+      await transporter.sendMail({
+        from: env.EMAIL_FROM,
+        to: options.to,
+        subject: options.subject,
+        html: options.html
+      });
+      console.log(`[EMAIL SENT] To: ${options.to} | Subject: ${options.subject}`);
+    } catch (error) {
+      console.error(`[EMAIL ERROR] Failed to send email to ${options.to}:`, error);
+    }
+  }
+
+  static async sendInvitationEmail(to: string, orgName: string, inviteToken: string, inviterName: string) {
+    const inviteUrl = `${env.CLIENT_URL}/accept-invitation?token=${inviteToken}`;
+    const subject = `You've been invited to join ${orgName} on WorkForge`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; background-color: #0f172a; padding: 30px; color: #f8fafc;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid #334155;">
+          <h2 style="color: #6366f1; margin-top: 0;">WorkForge Organization Invitation</h2>
+          <p>Hello,</p>
+          <p><strong>${inviterName}</strong> has invited you to join the <strong>${orgName}</strong> workspace on WorkForge.</p>
+          <div style="margin: 30px 0; text-align: center;">
+            <a href="${inviteUrl}" style="background-color: #6366f1; color: #ffffff; padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block;">Accept Invitation</a>
+          </div>
+          <p style="font-size: 12px; color: #94a3b8;">If the button above does not work, copy and paste this link into your browser:<br/><a href="${inviteUrl}" style="color: #818cf8;">${inviteUrl}</a></p>
+        </div>
+      </div>
+    `;
+
+    await this.sendMail({ to, subject, html });
+  }
+
+  static async sendVerificationEmail(to: string, userName: string, verifyToken: string) {
+    const verifyUrl = `${env.CLIENT_URL}/verify-email?token=${verifyToken}`;
+    const subject = `Verify your email for WorkForge`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; background-color: #0f172a; padding: 30px; color: #f8fafc;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid #334155;">
+          <h2 style="color: #6366f1; margin-top: 0;">Welcome to WorkForge</h2>
+          <p>Hi ${userName},</p>
+          <p>Please click the button below to verify your email address and activate your account.</p>
+          <div style="margin: 30px 0; text-align: center;">
+            <a href="${verifyUrl}" style="background-color: #10b981; color: #ffffff; padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block;">Verify Email Address</a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    await this.sendMail({ to, subject, html });
+  }
+
+  static async sendPasswordResetEmail(to: string, userName: string, resetToken: string) {
+    const resetUrl = `${env.CLIENT_URL}/reset-password?token=${resetToken}`;
+    const subject = `Reset your WorkForge Password`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; background-color: #0f172a; padding: 30px; color: #f8fafc;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid #334155;">
+          <h2 style="color: #ef4444; margin-top: 0;">Password Reset Request</h2>
+          <p>Hi ${userName},</p>
+          <p>We received a request to reset your WorkForge password. Click the button below to set a new password.</p>
+          <div style="margin: 30px 0; text-align: center;">
+            <a href="${resetUrl}" style="background-color: #ef4444; color: #ffffff; padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none; display: inline-block;">Reset Password</a>
+          </div>
+          <p style="font-size: 12px; color: #94a3b8;">If you did not request a password reset, you can safely ignore this email.</p>
+        </div>
+      </div>
+    `;
+
+    await this.sendMail({ to, subject, html });
+  }
+
+  static async sendTaskAssignedEmail(to: string, userName: string, taskTitle: string, taskKey: string, assignerName: string) {
+    const subject = `Task Assigned: [${taskKey}] ${taskTitle}`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; background-color: #0f172a; padding: 30px; color: #f8fafc;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid #334155;">
+          <h2 style="color: #6366f1; margin-top: 0;">New Task Assignment</h2>
+          <p>Hi ${userName},</p>
+          <p><strong>${assignerName}</strong> assigned task <strong>${taskKey}: ${taskTitle}</strong> to you.</p>
+          <div style="margin: 20px 0; padding: 16px; background-color: #0f172a; border-radius: 8px; border-left: 4px solid #6366f1;">
+            <span style="color: #818cf8; font-weight: bold;">${taskKey}</span> — ${taskTitle}
+          </div>
+        </div>
+      </div>
+    `;
+
+    await this.sendMail({ to, subject, html });
+  }
+}

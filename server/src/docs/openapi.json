@@ -1,0 +1,54 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "WorkForge Production SaaS API Documentation",
+    "version": "1.0.0",
+    "description": "Multi-Tenant Project & Operations Management Platform API Specification"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1",
+      "description": "Local Development Server"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check & Database Latency",
+        "responses": {
+          "200": { "description": "Server health status returned" }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register User Account",
+        "responses": {
+          "201": { "description": "User created with JWT pair" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login User",
+        "responses": {
+          "200": { "description": "JWT tokens issued" }
+        }
+      }
+    },
+    "/organizations": {
+      "get": {
+        "summary": "List User Organizations",
+        "responses": {
+          "200": { "description": "Organizations list" }
+        }
+      },
+      "post": {
+        "summary": "Create Organization Workspace",
+        "responses": {
+          "201": { "description": "Organization created" }
+        }
+      }
+    }
+  }
+}
