@@ -27,7 +27,13 @@ app.use(helmet());
 // CORS configuration
 app.use(
   cors({
-    origin: env.CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin || env.NODE_ENV === 'production' || origin === env.CLIENT_URL) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
   })
@@ -58,6 +64,18 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/organizations', organizationRoutes);
 app.use('/api/v1/invitations', invitationRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+
+// Production Static SPA Serving
+if (env.NODE_ENV === 'production') {
+  const clientBuildPath = path.join(__dirname, '../../client/dist');
+  app.use(express.static(clientBuildPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path.startsWith('/health')) {
+      return next();
+    }
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  });
+}
 
 // Centralized 404 & Error Handling
 app.use(notFoundHandler);
