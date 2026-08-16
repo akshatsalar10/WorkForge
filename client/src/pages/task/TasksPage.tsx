@@ -91,10 +91,10 @@ export const TasksPage: React.FC = () => {
       </div>
 
       {/* Controls Bar */}
-      <Card className="p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-3 w-full">
+      <Card className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Search tasks by title or key (e.g. ENG-104)..."
@@ -104,31 +104,35 @@ export const TasksPage: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-700/80 text-slate-200 rounded-lg text-xs px-2.5 py-2 outline-none"
-            >
-              <option value="">All Statuses</option>
-              <option value="TODO">TODO</option>
-              <option value="IN_PROGRESS">IN PROGRESS</option>
-              <option value="IN_REVIEW">IN REVIEW</option>
-              <option value="DONE">DONE</option>
-            </select>
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <div className="flex-1 sm:flex-none flex items-center gap-1.5 min-w-[120px]">
+              <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700/80 text-slate-200 rounded-lg text-xs px-2.5 py-2 outline-none"
+              >
+                <option value="">All Statuses</option>
+                <option value="TODO">TODO</option>
+                <option value="IN_PROGRESS">IN PROGRESS</option>
+                <option value="IN_REVIEW">IN REVIEW</option>
+                <option value="DONE">DONE</option>
+              </select>
+            </div>
 
-            <select
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-700/80 text-slate-200 rounded-lg text-xs px-2.5 py-2 outline-none"
-            >
-              <option value="">All Priorities</option>
-              <option value="URGENT">URGENT</option>
-              <option value="HIGH">HIGH</option>
-              <option value="MEDIUM">MEDIUM</option>
-              <option value="LOW">LOW</option>
-            </select>
+            <div className="flex-1 sm:flex-none flex items-center gap-1.5 min-w-[120px]">
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700/80 text-slate-200 rounded-lg text-xs px-2.5 py-2 outline-none"
+              >
+                <option value="">All Priorities</option>
+                <option value="URGENT">URGENT</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
+              </select>
+            </div>
           </div>
         </div>
       </Card>

@@ -155,7 +155,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-6 max-h-[90vh] overflow-y-auto">
         {/* Header Bar */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
           <div className="flex items-center gap-3">
@@ -170,10 +170,10 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
         </div>
 
         {/* Title */}
-        <h2 className="text-xl font-bold text-white tracking-tight">{task.title}</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">{task.title}</h2>
 
         {/* Tabs Bar */}
-        <div className="flex items-center gap-4 border-b border-slate-800 text-xs font-semibold">
+        <div className="flex items-center gap-3 sm:gap-4 border-b border-slate-800 text-xs font-semibold overflow-x-auto pb-1 scrollbar-none">
           <button
             onClick={() => setActiveTab('details')}
             className={`pb-2 border-b-2 transition-colors ${

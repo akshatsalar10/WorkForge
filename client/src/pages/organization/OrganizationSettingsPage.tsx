@@ -109,7 +109,7 @@ export const OrganizationSettingsPage: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-4 border-b border-slate-800 text-xs font-semibold">
+      <div className="flex items-center gap-3 sm:gap-4 border-b border-slate-800 text-xs font-semibold overflow-x-auto pb-1 scrollbar-none">
         <button
           onClick={() => setActiveTab('general')}
           className={`pb-2 border-b-2 transition-colors ${

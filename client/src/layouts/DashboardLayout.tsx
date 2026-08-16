@@ -107,34 +107,110 @@ export const DashboardLayout: React.FC = () => {
         </nav>
       </aside>
 
+      {/* Slide-over Drawer for Mobile Navigation */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+
+          {/* Drawer Sidebar */}
+          <aside className="relative flex flex-col w-4/5 max-w-xs bg-slate-900 border-r border-slate-800 p-4 space-y-4 shadow-2xl z-10 overflow-y-auto">
+            <div className="flex items-center justify-between px-2 py-1 border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white font-bold shadow-md shadow-brand-600/30">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <span className="text-lg font-bold text-white tracking-tight">WorkForge</span>
+              </div>
+              <button
+                onClick={() => setMobileSidebarOpen(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="px-1">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 px-2">Active Workspace</p>
+              <OrganizationSwitcher />
+            </div>
+
+            <nav className="flex-1 space-y-1 pt-2">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                      isActive
+                        ? 'bg-brand-600 text-white shadow-sm shadow-brand-600/30 font-semibold'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="pt-4 border-t border-slate-800 space-y-2">
+              <div className="flex items-center gap-3 px-3 py-2">
+                <div className="w-8 h-8 rounded-full bg-brand-700 flex items-center justify-center text-white text-xs font-bold uppercase">
+                  {user?.name?.slice(0, 2) || 'WF'}
+                </div>
+                <div className="truncate">
+                  <p className="text-xs font-semibold text-white truncate">{user?.name}</p>
+                  <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setMobileSidebarOpen(false);
+                  handleLogout();
+                }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-medium text-rose-400 hover:bg-rose-950/40 rounded-xl"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar */}
-        <header className="h-16 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-40">
-          <div className="flex items-center gap-3">
+        <header className="h-16 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/80 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-40 gap-2">
+          <div className="flex items-center gap-2">
             <button
-              className="md:hidden text-slate-400 hover:text-slate-200"
+              className="md:hidden p-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded-lg transition-colors"
               onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+              aria-label="Toggle Navigation Menu"
             >
-              {mobileSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <Menu className="w-6 h-6" />
             </button>
-            <div className="md:hidden w-44">
-              <OrganizationSwitcher />
-            </div>
             <h2 className="hidden md:block text-sm font-semibold text-slate-300">
               Welcome back, <span className="text-white font-bold">{user?.name}</span>
             </h2>
           </div>
 
           {/* Global Search Trigger Input */}
-          <div className="flex-1 max-w-xs md:max-w-md mx-4">
+          <div className="flex-1 max-w-xs md:max-w-md mx-1 sm:mx-4">
             <button
               onClick={() => setSearchModalOpen(true)}
-              className="w-full flex items-center justify-between bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 rounded-xl px-3 py-2 text-xs transition-colors shadow-inner"
+              className="w-full flex items-center justify-between bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 rounded-xl px-2.5 sm:px-3 py-2 text-xs transition-colors shadow-inner"
             >
-              <div className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-slate-500" />
-                <span>Search tasks, projects, teams...</span>
+              <div className="flex items-center gap-2 truncate">
+                <Search className="w-4 h-4 text-slate-500 shrink-0" />
+                <span className="truncate text-[11px] sm:text-xs">Search tasks, projects...</span>
               </div>
               <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 bg-slate-800 text-[10px] text-slate-400 font-mono rounded border border-slate-700">
                 ⌘K
@@ -142,7 +218,7 @@ export const DashboardLayout: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
             {/* Notification Bell Popover */}
             <div className="relative">
               <button
@@ -163,9 +239,9 @@ export const DashboardLayout: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-800/80 transition-colors"
+                className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-800/80 transition-colors"
               >
-                <div className="w-8 h-8 rounded-full bg-brand-700 border border-brand-500/40 flex items-center justify-center text-white text-xs font-bold uppercase">
+                <div className="w-8 h-8 rounded-full bg-brand-700 border border-brand-500/40 flex items-center justify-center text-white text-xs font-bold uppercase shrink-0">
                   {user?.avatarUrl ? (
                     <img src={user.avatarUrl} alt={user.name} className="w-full h-full rounded-full object-cover" />
                   ) : (
@@ -173,7 +249,7 @@ export const DashboardLayout: React.FC = () => {
                   )}
                 </div>
                 <span className="hidden sm:inline text-xs font-medium text-slate-200">{user?.name}</span>
-                <ChevronDown className="w-4 h-4 text-slate-400" />
+                <ChevronDown className="w-4 h-4 text-slate-400 hidden sm:block" />
               </button>
 
               {profileDropdownOpen && (
@@ -203,7 +279,7 @@ export const DashboardLayout: React.FC = () => {
         </header>
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           <Outlet />
         </main>
 

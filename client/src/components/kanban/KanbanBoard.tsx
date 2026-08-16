@@ -37,6 +37,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 }) => {
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeMobileColumn, setActiveMobileColumn] = useState<TaskStatus | 'ALL'>('ALL');
   const [updateTaskStatus] = useUpdateTaskStatusMutation();
 
   useEffect(() => {
@@ -84,7 +85,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     if (!targetStatus) return;
 
     const oldStatus = currentTask.status;
-    const isStatusChanged = oldStatus !== targetStatus;
 
     // Optimistic UI update
     const previousTasksState = [...tasks];
@@ -112,34 +112,76 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }
   };
 
+  const displayedColumns = activeMobileColumn === 'ALL'
+    ? COLUMNS
+    : COLUMNS.filter((col) => col.status === activeMobileColumn);
+
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <div className="flex gap-6 overflow-x-auto pb-6 items-start min-h-[500px]">
+    <div className="space-y-4">
+      {/* Mobile Column Quick Switcher Tab Bar */}
+      <div className="md:hidden flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none">
+        <button
+          onClick={() => setActiveMobileColumn('ALL')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-colors ${
+            activeMobileColumn === 'ALL'
+              ? 'bg-brand-600 text-white shadow-sm'
+              : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+          }`}
+        >
+          All Columns ({tasks.length})
+        </button>
         {COLUMNS.map((col) => {
-          const colTasks = tasks.filter((t) => t.status === col.status);
+          const count = tasks.filter((t) => t.status === col.status).length;
+          const isActive = activeMobileColumn === col.status;
           return (
-            <KanbanColumn
+            <button
               key={col.status}
-              status={col.status}
-              title={col.title}
-              tasks={colTasks}
-              accentColor={col.accentColor}
-              onCardClick={onCardClick}
-            />
+              onClick={() => setActiveMobileColumn(col.status)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 flex items-center gap-1.5 transition-colors ${
+                isActive
+                  ? 'bg-slate-800 text-white border border-slate-700 shadow-sm'
+                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${col.accentColor}`} />
+              <span>{col.title}</span>
+              <span className="text-[10px] bg-slate-800/80 px-1.5 py-0.5 rounded text-slate-300">
+                {count}
+              </span>
+            </button>
           );
         })}
       </div>
 
-      <DragOverlay>
-        {activeTask ? (
-          <KanbanCard task={activeTask} onCardClick={() => {}} />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-6 items-start min-h-[500px] snap-x snap-mandatory scrollbar-thin">
+          {displayedColumns.map((col) => {
+            const colTasks = tasks.filter((t) => t.status === col.status);
+            return (
+              <div key={col.status} className="snap-center shrink-0 w-[85vw] sm:w-80">
+                <KanbanColumn
+                  status={col.status}
+                  title={col.title}
+                  tasks={colTasks}
+                  accentColor={col.accentColor}
+                  onCardClick={onCardClick}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <DragOverlay>
+          {activeTask ? (
+            <KanbanCard task={activeTask} onCardClick={() => {}} />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
   );
 };

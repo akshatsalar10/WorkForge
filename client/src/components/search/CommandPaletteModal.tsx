@@ -59,7 +59,7 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 p-4 bg-slate-950/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-4 sm:pt-20 p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md">
       <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
         {/* Search Bar Input Header */}
         <div className="flex items-center gap-3 p-4 border-b border-slate-800 bg-slate-900/90">

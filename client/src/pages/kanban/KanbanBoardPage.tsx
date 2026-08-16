@@ -91,10 +91,10 @@ export const KanbanBoardPage: React.FC = () => {
       </div>
 
       {/* Control Filters Bar */}
-      <Card className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex flex-1 items-center gap-3 w-full">
+      <Card className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Search board cards..."
@@ -104,37 +104,39 @@ export const KanbanBoardPage: React.FC = () => {
             />
           </div>
 
-          {!routeProjectId && (
-            <div className="flex items-center gap-2">
-              <FolderKanban className="w-4 h-4 text-slate-400" />
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+            {!routeProjectId && (
+              <div className="flex-1 sm:flex-none flex items-center gap-1.5 min-w-[140px]">
+                <FolderKanban className="w-4 h-4 text-slate-400 shrink-0" />
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700/80 text-slate-200 rounded-lg text-xs px-2.5 py-2 outline-none"
+                >
+                  <option value="">All Projects</option>
+                  {projects.map((p) => (
+                    <option key={p.id || p._id} value={p.id || p._id}>
+                      [{p.key}] {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="flex-1 sm:flex-none flex items-center gap-1.5 min-w-[130px]">
+              <Filter className="w-4 h-4 text-slate-400 shrink-0" />
               <select
-                value={selectedProjectId}
-                onChange={(e) => setSelectedProjectId(e.target.value)}
-                className="bg-slate-900 border border-slate-700/80 text-slate-200 rounded-lg text-xs px-2.5 py-2 outline-none"
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700/80 text-slate-200 rounded-lg text-xs px-2.5 py-2 outline-none"
               >
-                <option value="">All Projects</option>
-                {projects.map((p) => (
-                  <option key={p.id || p._id} value={p.id || p._id}>
-                    [{p.key}] {p.name}
-                  </option>
-                ))}
+                <option value="">All Priorities</option>
+                <option value="URGENT">URGENT</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
               </select>
             </div>
-          )}
-
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-400" />
-            <select
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-700/80 text-slate-200 rounded-lg text-xs px-2.5 py-2 outline-none"
-            >
-              <option value="">All Priorities</option>
-              <option value="URGENT">URGENT</option>
-              <option value="HIGH">HIGH</option>
-              <option value="MEDIUM">MEDIUM</option>
-              <option value="LOW">LOW</option>
-            </select>
           </div>
         </div>
       </Card>

@@ -52,7 +52,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ isOpen
   };
 
   return (
-    <div className="absolute right-0 top-12 z-50 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[500px]">
+    <div className="absolute right-0 top-12 z-50 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[500px]">
       {/* Popover Header */}
       <div className="flex items-center justify-between p-4 bg-slate-900/90 border-b border-slate-800">
         <div className="flex items-center gap-2">
