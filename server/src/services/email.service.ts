@@ -3,17 +3,38 @@ import { env } from '../config/env';
 
 export class EmailService {
   private static getTransporter() {
-    if (!env.SMTP_USER || !env.SMTP_PASS) {
+    const user = process.env.SMTP_USER || env.SMTP_USER || '';
+    const pass = process.env.SMTP_PASS || env.SMTP_PASS || '';
+    const host = process.env.SMTP_HOST || env.SMTP_HOST || 'smtp.gmail.com';
+    const port = parseInt(process.env.SMTP_PORT || String(env.SMTP_PORT || 587), 10);
+    const secure = (process.env.SMTP_SECURE || String(env.SMTP_SECURE)) === 'true';
+
+    if (
+      !user ||
+      !pass ||
+      user.includes('your-email') ||
+      pass.includes('your-app-password')
+    ) {
       return null;
     }
 
+    if (host.includes('gmail')) {
+      return nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user,
+          pass
+        }
+      });
+    }
+
     return nodemailer.createTransport({
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: env.SMTP_SECURE,
+      host,
+      port,
+      secure,
       auth: {
-        user: env.SMTP_USER,
-        pass: env.SMTP_PASS
+        user,
+        pass
       }
     });
   }
@@ -26,14 +47,22 @@ export class EmailService {
       return;
     }
 
+    const smtpUser = process.env.SMTP_USER || env.SMTP_USER || '';
+    const emailFrom = process.env.EMAIL_FROM || env.EMAIL_FROM || '';
+
+    const fromHeader =
+      emailFrom && !emailFrom.includes('no-reply@workforge.com')
+        ? emailFrom
+        : `"WorkForge Team" <${smtpUser}>`;
+
     try {
-      await transporter.sendMail({
-        from: env.EMAIL_FROM,
+      const info = await transporter.sendMail({
+        from: fromHeader,
         to: options.to,
         subject: options.subject,
         html: options.html
       });
-      console.log(`[EMAIL SENT] To: ${options.to} | Subject: ${options.subject}`);
+      console.log(`[EMAIL SENT SUCCESS] To: ${options.to} | MessageId: ${info.messageId}`);
     } catch (error) {
       console.error(`[EMAIL ERROR] Failed to send email to ${options.to}:`, error);
     }
@@ -109,6 +138,39 @@ export class EmailService {
           <div style="margin: 20px 0; padding: 16px; background-color: #0f172a; border-radius: 8px; border-left: 4px solid #6366f1;">
             <span style="color: #818cf8; font-weight: bold;">${taskKey}</span> — ${taskTitle}
           </div>
+        </div>
+      </div>
+    `;
+
+    await this.sendMail({ to, subject, html });
+  }
+
+  static async sendCommentNotificationEmail(to: string, userName: string, taskTitle: string, taskKey: string, commenterName: string, commentContent: string) {
+    const subject = `New Comment on [${taskKey}] ${taskTitle}`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; background-color: #0f172a; padding: 30px; color: #f8fafc;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid #334155;">
+          <h2 style="color: #3b82f6; margin-top: 0;">New Task Comment</h2>
+          <p>Hi ${userName},</p>
+          <p><strong>${commenterName}</strong> commented on task <strong>${taskKey}: ${taskTitle}</strong>:</p>
+          <div style="margin: 20px 0; padding: 16px; background-color: #0f172a; border-radius: 8px; border-left: 4px solid #3b82f6; font-style: italic; color: #cbd5e1;">
+            "${commentContent}"
+          </div>
+        </div>
+      </div>
+    `;
+
+    await this.sendMail({ to, subject, html });
+  }
+
+  static async sendRoleUpdatedEmail(to: string, userName: string, orgName: string, newRole: string) {
+    const subject = `Your role in ${orgName} has been updated to ${newRole}`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; background-color: #0f172a; padding: 30px; color: #f8fafc;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid #334155;">
+          <h2 style="color: #a855f7; margin-top: 0;">Organization Role Update</h2>
+          <p>Hi ${userName},</p>
+          <p>Your member role in <strong>${orgName}</strong> has been updated to <strong>${newRole}</strong>.</p>
         </div>
       </div>
     `;

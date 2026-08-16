@@ -122,6 +122,21 @@ export class OrganizationService {
 
     targetMember.role = newRole;
     await targetMember.save();
+
+    // Send role update email notification
+    const [organization, targetUser] = await Promise.all([
+      Organization.findById(orgId),
+      User.findById(targetMember.userId)
+    ]);
+    if (organization && targetUser) {
+      EmailService.sendRoleUpdatedEmail(
+        targetUser.email,
+        targetUser.name,
+        organization.name,
+        newRole
+      ).catch((err) => console.error('Failed to send role updated email:', err));
+    }
+
     return targetMember;
   }
 
@@ -191,12 +206,16 @@ export class OrganizationService {
     ]);
 
     if (organization && inviter) {
-      EmailService.sendInvitationEmail(
-        email,
-        organization.name,
-        token,
-        inviter.name
-      ).catch((err) => console.error('Failed to send invitation email:', err));
+      try {
+        await EmailService.sendInvitationEmail(
+          email,
+          organization.name,
+          token,
+          inviter.name
+        );
+      } catch (err) {
+        console.error('Failed to send invitation email:', err);
+      }
     }
 
     return invitation;

@@ -12,19 +12,42 @@ Organizations can create dedicated workspaces, invite members with Role-Based Ac
 
 2. PRE-SEEDED DEMO ACCOUNTS & LOGIN CREDENTIALS
 --------------------------------------------------------------------------------
-The database has been seeded with realistic live project data (Organizations, Projects, Teams, Tasks across all 4 Kanban statuses, Subtasks, Comments, Activity Logs, and Notifications).
+The database has been pre-seeded with rich live project data (Organizations, Projects, Teams, Tasks across all 4 Kanban statuses, Subtasks, Comments, Activity Logs, Notifications, and Pending Invitations).
 
 All demo accounts use the default password: Password123
 
   [Role]               [Email]                   [Password]       [Permissions]
   --------------------------------------------------------------------------------
-  Organization Owner   alex@workforge.com        Password123      Full Owner Access, Org Deletion, Data Export JSON
-  Organization Admin   sarah@workforge.com       Password123      Admin Access, Member Invites, Audit Logs
-  Project Manager      david@workforge.com       Password123      Project Management, Task Assignment
-  Software Engineer    emily@workforge.com       Password123      Task Execution, Drag & Drop Board, Subtasks
+  Organization Owner   alex@workforge.com        Password123      Full Owner Access, Workspace Data Export, Org Purging
+  Organization Admin   sarah@workforge.com       Password123      Admin Access, Member Invites, Security Audit Logs
+  Project Manager      david@workforge.com       Password123      Project Management, Task Assignment, Board Controls
+  Lead Frontend Eng    emily@workforge.com       Password123      Frontend Task Execution, Subtask Checklists
+  Full Stack Engineer  michael@workforge.com     Password123      Backend API Tasks, Real-Time Socket Integrations
+  UI/UX Designer       jessica@workforge.com     Password123      UI Mockups, Mobile App Wireframes
 
 
-3. COMPLETE FEATURE SPECIFICATION (ALL 14 MODULES)
+3. NODEMAILER SMTP EMAIL SERVICE INTEGRATION (FULL COVERAGE)
+--------------------------------------------------------------------------------
+WorkForge includes a comprehensive Nodemailer Email Service (`EmailService.ts`) dispatching responsive HTML emails across all key user events:
+  1. Member Organization Invitations (`sendInvitationEmail`): Triggered when inviting team members with tokenized link.
+  2. User Registration Verification (`sendVerificationEmail`): Account activation token link upon sign up.
+  3. Password Reset Links (`sendPasswordResetEmail`): Forgot password reset token link.
+  4. Task Assignment Alerts (`sendTaskAssignedEmail`): Triggered when a user is assigned to a task.
+  5. Task Comment Alerts (`sendCommentNotificationEmail`): Triggered when a team member comments on an assigned task.
+  6. Member Role Change Alerts (`sendRoleUpdatedEmail`): Triggered when an admin updates a member's role (e.g., MEMBER to ADMIN).
+
+SMTP credentials are configured in `.env` and `server/.env`:
+  SMTP_HOST=smtp.gmail.com
+  SMTP_PORT=587
+  SMTP_SECURE=false
+  SMTP_USER=your-email@gmail.com
+  SMTP_PASS=your-app-password
+  EMAIL_FROM="WorkForge Team" <no-reply@workforge.com>
+
+*Note: If placeholder credentials are used in `.env`, EmailService safely logs email details to stdout without crashing any API requests.*
+
+
+4. COMPLETE FEATURE SPECIFICATION (ALL 14 MODULES)
 --------------------------------------------------------------------------------
 Module 1: Monorepo Foundation & Tech Stack
   - Server: Node.js, Express, TypeScript, Mongoose, Socket.IO, Winston, Zod validation.
@@ -46,7 +69,7 @@ Module 4: Team Management & Member Assignments
   - Interactive Teams page and Team Details roster view.
 
 Module 5: Projects & Access Controls
-  - Project key generation (e.g. WEB, API, DES).
+  - Project key generation (e.g. WEB, API, MOB).
   - Project member roles: MANAGER, MEMBER, VIEWER.
   - Project archiving, status filters, and priority tags (LOW, MEDIUM, HIGH, URGENT).
 
@@ -92,7 +115,7 @@ Module 14: System Hardening & Documentation
   - System status monitoring page under /health with database latency pings.
 
 
-4. HOW TO RUN THE PROJECT LOCALLY
+5. HOW TO RUN THE PROJECT LOCALLY
 --------------------------------------------------------------------------------
 Prerequisites:
   - Node.js (v18 or higher)
@@ -115,7 +138,7 @@ Step 4: Open Browser
   Navigate to http://localhost:5173 and log in with any demo account (e.g., alex@workforge.com / Password123).
 
 
-5. API ENDPOINT QUICK REFERENCE
+6. API ENDPOINT QUICK REFERENCE
 --------------------------------------------------------------------------------
   Authentication:
     POST   /api/v1/auth/register
@@ -127,6 +150,7 @@ Step 4: Open Browser
     GET    /api/v1/organizations
     POST   /api/v1/organizations
     GET    /api/v1/organizations/:orgId/members
+    POST   /api/v1/organizations/:orgId/invitations
     GET    /api/v1/organizations/:orgId/export
     GET    /api/v1/organizations/:orgId/audit-logs
     DELETE /api/v1/organizations/:orgId

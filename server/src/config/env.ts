@@ -1,12 +1,16 @@
 import dotenv from 'dotenv';
+import path from 'path';
 import { z } from 'zod';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.string().transform((val) => parseInt(val, 10)).default('5000'),
-  MONGODB_URI: z.string().default('mongodb://localhost:27017/workforge'),
+  MONGODB_URI: z.string().default('mongodb+srv://akshatsalar_db_user:5wVh5mRgcL3YwxfI@cluster0.hxgvuxp.mongodb.net/'),
   JWT_SECRET: z.string().default('workforge-super-secret-jwt-key-change-in-prod'),
   JWT_EXPIRES_IN: z.string().default('15m'),
   REFRESH_TOKEN_SECRET: z.string().default('workforge-super-secret-refresh-key-change-in-prod'),

@@ -1,6 +1,8 @@
 import { Comment, IComment } from '../models/comment.model';
 import { Task } from '../models/task.model';
+import { User } from '../models/user.model';
 import { ActivityService } from './activity.service';
+import { EmailService } from './email.service';
 import { AppError } from '../utils/appError';
 
 export class CommentService {
@@ -27,6 +29,24 @@ export class CommentService {
       commentId: comment._id,
       snippet: content.length > 50 ? `${content.slice(0, 50)}...` : content
     });
+
+    // Notify task assignee if different from author
+    if (task.assigneeId && task.assigneeId.toString() !== authorId) {
+      const [assignee, author] = await Promise.all([
+        User.findById(task.assigneeId),
+        User.findById(authorId)
+      ]);
+      if (assignee && author) {
+        EmailService.sendCommentNotificationEmail(
+          assignee.email,
+          assignee.name,
+          task.title,
+          task.taskKey,
+          author.name,
+          content
+        ).catch((err) => console.error('Failed to send comment email notification:', err));
+      }
+    }
 
     return await comment.populate('authorId', 'name email avatarUrl');
   }

@@ -3,6 +3,7 @@ import { RefreshToken } from '../models/refreshToken.model';
 import { hashPassword, comparePassword } from '../utils/password';
 import { generateAccessToken, generateRandomToken, hashToken } from '../utils/token';
 import { AppError } from '../utils/appError';
+import { EmailService } from './email.service';
 import crypto from 'crypto';
 
 export interface AuthTokens {
@@ -29,6 +30,10 @@ export class AuthService {
       verificationToken: hashToken(verificationToken),
       verificationTokenExpires
     });
+
+    // Send Email Verification email
+    EmailService.sendVerificationEmail(user.email, user.name, verificationToken)
+      .catch((err) => console.error('Failed to send verification email:', err));
 
     const tokens = await this.createSession(user._id.toString());
     return { user, tokens };
@@ -144,7 +149,10 @@ export class AuthService {
     user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await user.save();
 
-    // Note: Email sending service will be wired up in background job module
+    // Send Password Reset email
+    EmailService.sendPasswordResetEmail(user.email, user.name, resetToken)
+      .catch((err) => console.error('Failed to send password reset email:', err));
+
     return resetToken;
   }
 

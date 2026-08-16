@@ -2,8 +2,10 @@ import { Task, ITask, TaskStatus, TaskPriority, ISubtask } from '../models/task.
 import { Project } from '../models/project.model';
 import { Label, ILabel } from '../models/label.model';
 import { OrganizationMember } from '../models/organizationMember.model';
+import { User } from '../models/user.model';
 import { ActivityService } from './activity.service';
 import { NotificationService } from './notification.service';
+import { EmailService } from './email.service';
 import { AppError } from '../utils/appError';
 import { Types } from 'mongoose';
 
@@ -84,6 +86,20 @@ export class TaskService {
         message: `You were assigned to task ${taskKey}: "${data.title}"`,
         link: `/tasks`
       });
+
+      const [assignee, assigner] = await Promise.all([
+        User.findById(data.assigneeId),
+        User.findById(reporterUserId)
+      ]);
+      if (assignee && assigner) {
+        EmailService.sendTaskAssignedEmail(
+          assignee.email,
+          assignee.name,
+          data.title,
+          taskKey,
+          assigner.name
+        ).catch((err) => console.error('Failed to send task assignment email:', err));
+      }
     }
 
     return await this.getTaskById(orgId, task._id.toString());

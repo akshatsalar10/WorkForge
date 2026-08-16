@@ -17,8 +17,11 @@ import { ActivityLog } from '../models/activityLog.model';
 import { Notification } from '../models/notification.model';
 import { Invitation } from '../models/invitation.model';
 
+import { env } from '../config/env';
+import { hashPassword } from '../utils/password';
+
 async function seed() {
-  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/workforge';
+  const mongoUri = env.MONGODB_URI;
   console.log(`Connecting to MongoDB at ${mongoUri}...`);
   await mongoose.connect(mongoUri);
 
@@ -38,7 +41,7 @@ async function seed() {
   ]);
 
   console.log('Seeding Demo Users...');
-  const passwordHash = await bcrypt.hash('Password123', 10);
+  const passwordHash = await hashPassword('Password123');
 
   const userAlex = await User.create({
     name: 'Alex Mercer (Owner)',
