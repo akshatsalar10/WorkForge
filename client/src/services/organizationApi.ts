@@ -111,7 +111,7 @@ export const organizationApi = baseApi.injectEndpoints({
       query: (orgId) => `/organizations/${orgId}/invitations`,
       providesTags: ['Organization']
     }),
-    inviteMember: builder.mutation<{ success: boolean; data: { invitation: Invitation }; message: string }, InviteMemberRequest>({
+    inviteMember: builder.mutation<{ success: boolean; data: { invitation: Invitation; inviteUrl?: string }; message: string }, InviteMemberRequest>({
       query: ({ orgId, ...body }) => ({
         url: `/organizations/${orgId}/invitations`,
         method: 'POST',

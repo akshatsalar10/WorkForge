@@ -3,6 +3,10 @@ import { env } from '../config/env';
 
 export class EmailService {
   private static getTransporter() {
+    if (process.env.NODE_ENV === 'test' || env.NODE_ENV === 'test') {
+      return null;
+    }
+
     const user = process.env.SMTP_USER || env.SMTP_USER || '';
     const pass = process.env.SMTP_PASS || env.SMTP_PASS || '';
     const host = process.env.SMTP_HOST || env.SMTP_HOST || 'smtp.gmail.com';
@@ -18,13 +22,23 @@ export class EmailService {
       return null;
     }
 
+    const transportOptions = {
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
+      auth: {
+        user,
+        pass
+      }
+    };
+
     if (host.includes('gmail')) {
       return nodemailer.createTransport({
         service: 'gmail',
-        auth: {
-          user,
-          pass
-        }
+        ...transportOptions
       });
     }
 
@@ -32,18 +46,15 @@ export class EmailService {
       host,
       port,
       secure,
-      auth: {
-        user,
-        pass
-      }
+      ...transportOptions
     });
   }
 
-  private static async sendMail(options: { to: string; subject: string; html: string }) {
+  private static async sendMail(options: { to: string; subject: string; html: string }): Promise<void> {
     const transporter = this.getTransporter();
 
     if (!transporter) {
-      console.log(`[EMAIL LOG - NO SMTP CREDS] To: ${options.to} | Subject: ${options.subject}`);
+      console.log(`[EMAIL LOG - NO SMTP / TEST MODE] To: ${options.to} | Subject: ${options.subject}`);
       return;
     }
 

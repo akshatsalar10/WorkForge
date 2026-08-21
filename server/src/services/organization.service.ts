@@ -5,6 +5,7 @@ import { User } from '../models/user.model';
 import { AppError } from '../utils/appError';
 import { generateRandomToken } from '../utils/token';
 import { EmailService } from './email.service';
+import { env } from '../config/env';
 import { Types } from 'mongoose';
 
 export class OrganizationService {
@@ -161,7 +162,7 @@ export class OrganizationService {
     orgId: string,
     data: { email: string; role: OrgRole },
     invitedByUserId: string
-  ): Promise<IInvitation> {
+  ): Promise<{ invitation: IInvitation; inviteUrl: string }> {
     const email = data.email.toLowerCase();
 
     // Check if user is already a member
@@ -199,26 +200,28 @@ export class OrganizationService {
       expiresAt
     });
 
-    // Send Invitation Email via Nodemailer
-    const [organization, inviter] = await Promise.all([
+    const inviteUrl = `${env.CLIENT_URL}/accept-invitation?token=${token}`;
+
+    // Send Invitation Email asynchronously in background so HTTP response is instant
+    Promise.all([
       Organization.findById(orgId),
       User.findById(invitedByUserId)
-    ]);
+    ])
+      .then(([organization, inviter]) => {
+        if (organization && inviter) {
+          return EmailService.sendInvitationEmail(
+            email,
+            organization.name,
+            token,
+            inviter.name
+          );
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to send invitation email in background:', err);
+      });
 
-    if (organization && inviter) {
-      try {
-        await EmailService.sendInvitationEmail(
-          email,
-          organization.name,
-          token,
-          inviter.name
-        );
-      } catch (err) {
-        console.error('Failed to send invitation email:', err);
-      }
-    }
-
-    return invitation;
+    return { invitation, inviteUrl };
   }
 
   static async getPendingInvitations(orgId: string) {

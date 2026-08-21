@@ -126,7 +126,7 @@ export class OrganizationController {
 
   static async inviteMember(req: Request, res: Response, next: NextFunction) {
     try {
-      const invitation = await OrganizationService.inviteMember(
+      const result = await OrganizationService.inviteMember(
         req.params.orgId,
         req.body,
         req.user!._id.toString()
@@ -134,8 +134,8 @@ export class OrganizationController {
       return ApiResponse.success({
         res,
         statusCode: 201,
-        message: 'Invitation sent successfully.',
-        data: { invitation }
+        message: 'Invitation generated and sent successfully.',
+        data: result
       });
     } catch (error) {
       next(error);
