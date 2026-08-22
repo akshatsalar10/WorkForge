@@ -44,7 +44,12 @@ export const CreateOrganizationModal: React.FC<CreateOrganizationModalProps> = (
   const onSubmit = async (data: CreateOrgFormValues) => {
     setErrorMsg(null);
     try {
-      const res = await createOrg(data).unwrap();
+      const payload: CreateOrgFormValues = {
+        name: data.name.trim(),
+        ...(data.slug && data.slug.trim() !== '' ? { slug: data.slug.trim() } : {}),
+        ...(data.logoUrl && data.logoUrl.trim() !== '' ? { logoUrl: data.logoUrl.trim() } : {})
+      };
+      const res = await createOrg(payload).unwrap();
       dispatch(setActiveOrganization(res.data.organization.id || res.data.organization._id));
       reset();
       onClose();

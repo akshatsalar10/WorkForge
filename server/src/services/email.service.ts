@@ -7,11 +7,13 @@ export class EmailService {
       return null;
     }
 
-    const user = process.env.SMTP_USER || env.SMTP_USER || '';
-    const pass = process.env.SMTP_PASS || env.SMTP_PASS || '';
-    const host = process.env.SMTP_HOST || env.SMTP_HOST || 'smtp.gmail.com';
+    const user = (process.env.SMTP_USER || env.SMTP_USER || '').trim();
+    const rawPass = (process.env.SMTP_PASS || env.SMTP_PASS || '').trim();
+    // Strip spaces from Google App Passwords (e.g. "rjpm hkgx hslf tjyd" -> "rjpmhkgxhslftjyd")
+    const pass = rawPass.replace(/\s+/g, '');
+    const host = (process.env.SMTP_HOST || env.SMTP_HOST || 'smtp.gmail.com').trim();
     const port = parseInt(process.env.SMTP_PORT || String(env.SMTP_PORT || 587), 10);
-    const secure = (process.env.SMTP_SECURE || String(env.SMTP_SECURE)) === 'true';
+    const secure = (process.env.SMTP_SECURE || String(env.SMTP_SECURE)) === 'true' || port === 465;
 
     if (
       !user ||
@@ -22,23 +24,26 @@ export class EmailService {
       return null;
     }
 
-    const transportOptions = {
+    const commonOptions = {
       pool: true,
       maxConnections: 5,
       maxMessages: 100,
-      connectionTimeout: 5000,
-      greetingTimeout: 5000,
-      socketTimeout: 10000,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
+      tls: {
+        rejectUnauthorized: false
+      },
       auth: {
         user,
         pass
       }
     };
 
-    if (host.includes('gmail')) {
+    if (host.includes('gmail') || user.includes('@gmail.com')) {
       return nodemailer.createTransport({
         service: 'gmail',
-        ...transportOptions
+        ...commonOptions
       });
     }
 
@@ -46,7 +51,7 @@ export class EmailService {
       host,
       port,
       secure,
-      ...transportOptions
+      ...commonOptions
     });
   }
 
@@ -68,8 +73,8 @@ export class EmailService {
       return;
     }
 
-    const smtpUser = process.env.SMTP_USER || env.SMTP_USER || '';
-    const emailFrom = process.env.EMAIL_FROM || env.EMAIL_FROM || '';
+    const smtpUser = (process.env.SMTP_USER || env.SMTP_USER || '').trim();
+    const emailFrom = (process.env.EMAIL_FROM || env.EMAIL_FROM || '').trim();
 
     // Gmail SMTP requires the From address to match the authenticated SMTP_USER to avoid spam filter blocking
     const fromHeader =
@@ -89,8 +94,13 @@ export class EmailService {
         text: plainText
       });
       console.log(`[EMAIL SENT SUCCESS] To: ${options.to} | MessageId: ${info.messageId}`);
-    } catch (error) {
-      console.error(`[EMAIL ERROR] Failed to send email to ${options.to}:`, error);
+    } catch (error: any) {
+      console.error(`[EMAIL ERROR] Failed to send email to ${options.to}:`, {
+        message: error?.message,
+        code: error?.code,
+        command: error?.command,
+        response: error?.response
+      });
     }
   }
 

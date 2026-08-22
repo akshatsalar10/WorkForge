@@ -2,18 +2,27 @@ import { z } from 'zod';
 
 export const createOrganizationSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name cannot exceed 50 characters'),
-  slug: z
-    .string()
-    .min(2, 'Slug must be at least 2 characters')
-    .max(30, 'Slug cannot exceed 30 characters')
-    .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
-    .optional(),
-  logoUrl: z.string().url('Logo URL must be valid').or(z.literal('')).optional()
+  slug: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z
+      .string()
+      .min(2, 'Slug must be at least 2 characters')
+      .max(30, 'Slug cannot exceed 30 characters')
+      .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
+      .optional()
+  ),
+  logoUrl: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.string().url('Logo URL must be valid').optional()
+  )
 });
 
 export const updateOrganizationSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name cannot exceed 50 characters').optional(),
-  logoUrl: z.string().url('Logo URL must be valid').or(z.literal('')).optional()
+  logoUrl: z.preprocess(
+    (val) => (val === '' ? undefined : val),
+    z.string().url('Logo URL must be valid').optional()
+  )
 });
 
 export const inviteMemberSchema = z.object({
