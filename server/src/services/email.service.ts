@@ -50,7 +50,17 @@ export class EmailService {
     });
   }
 
-  private static async sendMail(options: { to: string; subject: string; html: string }): Promise<void> {
+  private static async sendMail(options: { to: string; subject: string; html: string; text?: string }): Promise<void> {
+    const recipient = (options.to || '').trim().toLowerCase();
+
+    // Prevent sending real emails to dummy/test domains that trigger Gmail spam blocks & bounces
+    const dummyDomains = ['example.com', 'example.org', 'example.net', 'test.com', 'localhost', 'invalid'];
+    const recipientDomain = recipient.split('@')[1] || '';
+    if (dummyDomains.includes(recipientDomain)) {
+      console.log(`[EMAIL LOG - DUMMY DOMAIN SKIPPED] To: ${options.to} | Subject: ${options.subject}`);
+      return;
+    }
+
     const transporter = this.getTransporter();
 
     if (!transporter) {
@@ -61,17 +71,22 @@ export class EmailService {
     const smtpUser = process.env.SMTP_USER || env.SMTP_USER || '';
     const emailFrom = process.env.EMAIL_FROM || env.EMAIL_FROM || '';
 
+    // Gmail SMTP requires the From address to match the authenticated SMTP_USER to avoid spam filter blocking
     const fromHeader =
-      emailFrom && !emailFrom.includes('no-reply@workforge.com')
-        ? emailFrom
-        : `"WorkForge Team" <${smtpUser}>`;
+      smtpUser.includes('@gmail.com') || !emailFrom || emailFrom.includes('no-reply@workforge.com')
+        ? `"WorkForge Team" <${smtpUser}>`
+        : emailFrom;
+
+    // Generate plain text fallback by stripping HTML tags if plain text is not explicitly passed
+    const plainText = options.text || options.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
     try {
       const info = await transporter.sendMail({
         from: fromHeader,
         to: options.to,
         subject: options.subject,
-        html: options.html
+        html: options.html,
+        text: plainText
       });
       console.log(`[EMAIL SENT SUCCESS] To: ${options.to} | MessageId: ${info.messageId}`);
     } catch (error) {
